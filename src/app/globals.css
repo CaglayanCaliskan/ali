@@ -1,0 +1,105 @@
+@import "tailwindcss";
+
+:root {
+  --bg-primary: #0d0c0a;
+  --bg-secondary: #161411;
+  --bg-card: #1c1915;
+  --bg-card-hover: #24201a;
+  --text-primary: #f5f2eb;
+  --text-secondary: #a69e92;
+  --text-muted: #736c62;
+  
+  --gold-50: #fbf7ee;
+  --gold-100: #f4ecda;
+  --gold-200: #e8d7b3;
+  --gold-300: #d9bf87;
+  --gold-400: #c9a45e;
+  --gold-500: #b89047;
+  --gold-600: #9e7537;
+  --gold-700: #7d572b;
+  
+  --border-gold: rgba(201, 164, 94, 0.22);
+  --border-gold-light: rgba(201, 164, 94, 0.45);
+}
+
+@theme {
+  --color-gold-50: #fbf7ee;
+  --color-gold-100: #f4ecda;
+  --color-gold-200: #e8d7b3;
+  --color-gold-300: #d9bf87;
+  --color-gold-400: #c9a45e;
+  --color-gold-500: #b89047;
+  --color-gold-600: #9e7537;
+  --color-gold-700: #7d572b;
+
+  --color-obsidian-950: #0d0c0a;
+  --color-obsidian-900: #161411;
+  --color-obsidian-800: #1c1915;
+  --color-obsidian-700: #26221c;
+
+  --font-serif: var(--font-cormorant), Georgia, serif;
+  --font-sans: var(--font-jakarta), system-ui, sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
+  color-scheme: dark;
+}
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  overflow-x: hidden;
+  selection-background-color: #c9a45e;
+  selection-color: #0d0c0a;
+}
+
+::selection {
+  background: #c9a45e;
+  color: #0d0c0a;
+}
+
+/* Custom Gold Shimmer & Borders */
+.gold-gradient-text {
+  background: linear-gradient(135deg, #f5f2eb 0%, #e8d7b3 40%, #c9a45e 75%, #b89047 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.gold-gradient-border {
+  border-image: linear-gradient(135deg, rgba(201, 164, 94, 0.6), rgba(201, 164, 94, 0.1), rgba(201, 164, 94, 0.6)) 1;
+}
+
+.subtle-glass {
+  background: rgba(22, 20, 17, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(201, 164, 94, 0.18);
+}
+
+.subtle-glass-hover {
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.subtle-glass-hover:hover {
+  background: rgba(28, 25, 21, 0.9);
+  border-color: rgba(201, 164, 94, 0.4);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+}
+
+/* Certificate frame lines */
+.cert-pattern {
+  background-image: radial-gradient(rgba(201, 164, 94, 0.08) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+/* Hide scrollbar for photo ribbons */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
