@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { Search, QrCode, Sparkles, Menu, X } from "lucide-react";
 
@@ -32,14 +33,25 @@ export default function Navbar({ onOpenSearch }: NavbarProps) {
         {/* Brand Logo */}
         <Link
           href="/"
-          className="group flex flex-col items-start focus:outline-none"
+          className="group flex items-center gap-3 focus:outline-none"
         >
-          <span className="font-serif text-2xl sm:text-3xl font-light tracking-wider text-[#f5f2eb] group-hover:text-[#c9a45e] transition-colors">
-            Ali Sıralıoğlu<span className="text-[#c9a45e]">.</span>
-          </span>
-          <span className="text-[10px] tracking-[0.28em] uppercase text-[#a69e92] font-sans -mt-1 group-hover:text-[#f5f2eb] transition-colors">
-            El Yapımı Tespih Sanatı
-          </span>
+          <div className="relative w-10 h-10 sm:w-11 sm:h-11 rounded-full overflow-hidden border border-[#c9a45e]/40 shadow-lg shrink-0 group-hover:border-[#c9a45e] transition-all duration-300">
+            <Image
+              src="/images/main_logo.jpg"
+              alt="Ali Sıralıoğlu Mühür Logo"
+              fill
+              sizes="44px"
+              className="object-cover"
+            />
+          </div>
+          <div className="flex flex-col items-start">
+            <span className="font-serif text-xl sm:text-2xl font-light tracking-wider text-[#f5f2eb] group-hover:text-[#c9a45e] transition-colors leading-tight">
+              Ali Sıralıoğlu<span className="text-[#c9a45e]">.</span>
+            </span>
+            <span className="text-[9px] sm:text-[10px] tracking-[0.28em] uppercase text-[#a69e92] font-sans -mt-0.5 group-hover:text-[#f5f2eb] transition-colors">
+              El Yapımı Tespih Sanatı
+            </span>
+          </div>
         </Link>
 
         {/* Desktop Navigation Links */}

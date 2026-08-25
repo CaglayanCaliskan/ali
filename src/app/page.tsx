@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
 import PhotoGallery from "@/components/PhotoGallery";
@@ -25,7 +26,18 @@ export default function Home() {
       <section id="dogrulama" className="py-24 bg-[#12100d] relative overflow-hidden border-y border-[#c9a45e]/15">
         <div className="absolute inset-0 bg-radial from-[#c9a45e]/5 via-transparent to-transparent pointer-events-none" />
         <div className="max-w-7xl mx-auto px-6 sm:px-8 relative z-10">
-          <div className="text-center max-w-2xl mx-auto mb-12 space-y-3">
+          <div className="text-center max-w-2xl mx-auto mb-12 space-y-4">
+            {/* Seal & Signature Badge */}
+            <div className="mx-auto relative w-20 h-28 sm:w-24 sm:h-32 rounded-2xl overflow-hidden border border-[#c9a45e]/35 shadow-2xl bg-[#070706] group hover:border-[#c9a45e]/70 transition-colors">
+              <Image
+                src="/images/main_logo_signature.jpg"
+                alt="Ali Sıralıoğlu İmzalı Mühür"
+                fill
+                sizes="100px"
+                className="object-cover"
+              />
+            </div>
+
             <span className="text-[11px] uppercase tracking-[0.28em] text-[#c9a45e] font-semibold flex items-center justify-center gap-1.5">
               <QrCode className="w-3.5 h-3.5" />
               Dijital Kimlik Merkezi
@@ -41,9 +53,6 @@ export default function Home() {
           <SerialSearch />
         </div>
       </section>
-
-      {/* 5. Masterpieces Showcase */}
-      <RecentWorks />
 
       {/* 6. Footer */}
       <Footer />

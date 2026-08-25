@@ -48,11 +48,35 @@ export default function CraftSection() {
 
             <div className="space-y-4 text-sm sm:text-base text-[#a69e92] font-light leading-relaxed">
               <p>
-                Ali Sıralıoğlu atölyesinde tespih bir seri üretim objesi değil; asırlık ağaçların, fosil kehribarların ve kıymetli taşların sabırla dinlenip el tornasında hayat bulduğu bir sanat disiplinidir.
+                Ali Sıralıoğlu atölyesinde tespih bir seri üretim objesi değil; asırlık ağaçların, kehribarların ve kıymetli özel dökümlerin özenle seçilerek el tornasında hayat bulduğu bir disiplin ürünüdür.
               </p>
               <p>
-                Her habbe, usta tarafından mikron hassasiyetinde el keskileriyle tek tek biçimlendirilir. Denge, ağırlık merkezi ve ipeğin habbe içindeki akışı en yüksek çekim hazzı için milimetrik hesaplanır.
+                Her bir habbe, usta tarafından hassasiyet ve keyif ile tek tek biçimlendirilir. Çekim hazzı en iyi olacak şekilde şekillendirilir. Usta; eserin, hammadde kesim aşamasından ipe dizim aşamasına kadar ustanın elinden çıktığını garanti ve taahhüt eder.
               </p>
+              <p>
+                İdealist yaklaşımla doğru döküm, doğru doğal ürün veya her tür hammadde ustanın süzgecinden geçerek koleksiyonere ulaşır.
+              </p>
+            </div>
+
+            {/* Signature Seal Badge */}
+            <div className="pt-2 flex items-center gap-4">
+              <div className="relative w-14 h-14 sm:w-16 sm:h-16 rounded-full overflow-hidden border border-[#c9a45e]/40 shadow-xl bg-[#0d0c0a] shrink-0">
+                <Image
+                  src="/images/main_logo.jpg"
+                  alt="Ali Sıralıoğlu Usta Mührü"
+                  fill
+                  sizes="64px"
+                  className="object-cover"
+                />
+              </div>
+              <div className="space-y-0.5">
+                <span className="font-serif italic text-lg sm:text-xl text-[#f5f2eb] block">
+                  Ali Sıralıoğlu
+                </span>
+                <span className="text-[10px] tracking-[0.25em] uppercase text-[#c9a45e] font-semibold block">
+                  Usta İmzalı & Tescilli Marka
+                </span>
+              </div>
             </div>
 
             {/* Feature Highlights Grid */}

@@ -1,5 +1,6 @@
+import Image from "next/image";
 import Link from "next/link";
-import { Sparkles, ShieldCheck, Mail, MapPin } from "lucide-react";
+import { Sparkles, ShieldCheck, Mail, MapPin, Phone } from "lucide-react";
 
 export default function Footer() {
   return (
@@ -8,13 +9,24 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-12 gap-10">
           {/* Col 1: Brand */}
           <div className="md:col-span-5 space-y-4">
-            <Link href="/" className="inline-block">
-              <span className="font-serif text-3xl font-light text-[#f5f2eb]">
-                Ali Sıralıoğlu<span className="text-[#c9a45e]">.</span>
-              </span>
-              <span className="block text-[10px] tracking-[0.3em] uppercase text-[#a69e92]">
-                Butik Tespih Sanatı & Atölyesi
-              </span>
+            <Link href="/" className="inline-flex items-center gap-3.5 group">
+              <div className="relative w-12 h-12 rounded-full overflow-hidden border border-[#c9a45e]/40 shadow-lg bg-[#0d0c0a] shrink-0 group-hover:border-[#c9a45e] transition-colors">
+                <Image
+                  src="/images/main_logo.jpg"
+                  alt="Ali Sıralıoğlu Mühür Logo"
+                  fill
+                  sizes="48px"
+                  className="object-cover"
+                />
+              </div>
+              <div>
+                <span className="font-serif text-2xl sm:text-3xl font-light text-[#f5f2eb] block leading-tight">
+                  Ali Sıralıoğlu<span className="text-[#c9a45e]">.</span>
+                </span>
+                <span className="block text-[10px] tracking-[0.3em] uppercase text-[#a69e92] -mt-0.5">
+                  Butik Tespih Sanatı & Atölyesi
+                </span>
+              </div>
             </Link>
             <p className="text-xs text-[#736c62] max-w-sm leading-relaxed font-light">
               Doğanın en asil malzemelerini geleneksel el tornasında sanat eserine dönüştüren usta işçilik. Her eser eşsizdir ve dijital sertifikası ile kayıt altındadır.
@@ -54,9 +66,23 @@ export default function Footer() {
             <p className="text-xs text-[#736c62] leading-relaxed font-light">
               Satın aldığınız tespihin orijinallik kartındaki QR kodu telefonunuzun kamerasıyla okutarak doğrudan eser sayfasına ulaşabilirsiniz.
             </p>
-            <div className="pt-2 text-xs text-[#d9bf87] flex items-center gap-2">
-              <MapPin className="w-3.5 h-3.5 text-[#c9a45e]" />
-              <span>İzmir, Türkiye</span>
+            <div className="pt-2 space-y-2 text-xs text-[#d9bf87]">
+              <div className="flex items-center gap-2">
+                <Mail className="w-3.5 h-3.5 text-[#c9a45e]" />
+                <Link href="mailto:asiralioglu@gmail.com" className="hover:text-white transition-colors">
+                  asiralioglu@gmail.com
+                </Link>
+              </div>
+              <div className="flex items-center gap-2">
+                <Phone className="w-3.5 h-3.5 text-[#c9a45e]" />
+                <Link href="https://wa.me/905071397895" target="_blank" className="hover:text-white transition-colors">
+                  +90 507 139 78 95
+                </Link>
+              </div>
+              <div className="flex items-center gap-2">
+                <MapPin className="w-3.5 h-3.5 text-[#c9a45e]" />
+                <span>Karşıyaka, İzmir, Türkiye</span>
+              </div>
             </div>
           </div>
         </div>

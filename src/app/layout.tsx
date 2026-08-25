@@ -53,7 +53,13 @@ export const metadata: Metadata = {
     type: "website",
   },
   icons: {
-    icon: "/favicon.ico",
+    icon: [
+      { url: "/favicon.svg", type: "image/svg+xml" },
+    ],
+    apple: [
+      { url: "/favicon.svg" },
+    ],
+    shortcut: "/favicon.svg",
   },
 };
 
@@ -65,8 +71,13 @@ export default function RootLayout({
   return (
     <html
       lang="tr"
+      data-scroll-behavior="smooth"
       className={`${cormorant.variable} ${jakarta.variable} scroll-smooth`}
     >
+      <head>
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <link rel="apple-touch-icon" href="/favicon.svg" />
+      </head>
       <body className="min-h-screen bg-[#0d0c0a] text-[#f5f2eb] font-sans antialiased selection:bg-[#c9a45e] selection:text-[#0d0c0a] flex flex-col">
         {children}
       </body>

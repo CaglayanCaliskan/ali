@@ -40,7 +40,12 @@ export default function Hero() {
             </span>
           </h1>
           <p className="text-sm sm:text-base md:text-lg text-[#a69e92] font-light max-w-xl mx-auto tracking-wide leading-relaxed">
-            Her habbesi usta tornasında sabırla şekillendirilen, geçmişin derinliğini bugünün zarafetiyle buluşturan el yapımı tespihler.
+            Her habbe <span className="italic font-normal text-[#c9a45e] block sm:inline">neşe</span>, <span className="italic font-normal text-[#c9a45e] block sm:inline">hüzün</span>, <span className="italic font-normal text-[#c9a45e] block sm:inline">heyecan</span>, <span className="italic font-normal text-[#c9a45e] block sm:inline">huzur</span>, <span className="italic font-normal text-[#c9a45e] block sm:inline">gurur</span>, <span className="italic font-normal text-[#c9a45e] block sm:inline">acı</span>, <span className="italic font-normal text-[#c9a45e] block sm:inline">mutluluk</span> gibi
+            duygulara şahit olup, sessiz kalmayı seçer. Kimi zaman bir tespihten
+            çok belki de babadan dededen kalma bir mirastır.
+            <br />
+            <span className="italic font-normal gold-gradient-text block sm:inline">Değeri para ile
+              ölçülemez.</span>
           </p>
         </div>
 

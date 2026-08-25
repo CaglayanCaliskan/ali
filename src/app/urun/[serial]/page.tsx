@@ -191,8 +191,14 @@ export default function ProductDetailPage({
           className="relative p-6 sm:p-8 rounded-2xl bg-gradient-to-r from-[#1c1915] via-[#161411] to-[#1c1915] border border-[#c9a45e]/40 shadow-2xl flex flex-col md:flex-row items-center justify-between gap-6"
         >
           <div className="flex items-start sm:items-center gap-4">
-            <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-[#c9a45e]/15 border border-[#c9a45e]/50 flex items-center justify-center shrink-0 text-[#c9a45e]">
-              <ShieldCheck className="w-7 h-7 sm:w-8 sm:h-8" />
+            <div className="relative w-12 h-12 sm:w-14 sm:h-14 rounded-full overflow-hidden border border-[#c9a45e]/50 shadow-lg shrink-0 bg-[#0d0c0a]">
+              <Image
+                src="/images/main_logo.jpg"
+                alt="Ali Sıralıoğlu Mührü"
+                fill
+                sizes="56px"
+                className="object-cover"
+              />
             </div>
             <div className="space-y-1">
               <div className="flex items-center gap-2">
