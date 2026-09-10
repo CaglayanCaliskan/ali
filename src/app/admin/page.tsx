@@ -85,27 +85,6 @@ export default function AdminPage() {
   const [qrModalProduct, setQrModalProduct] = useState<TesbihProduct | null>(null);
   const [isUploading, setIsUploading] = useState(false);
 
-  // Fetch admin activity logs
-  const fetchLogs = async () => {
-    setLogsLoading(true);
-    const activePass = storedPassword || localStorage.getItem("ali_admin_pass") || "";
-    try {
-      const res = await fetch("/api/logs", {
-        headers: { "x-admin-password": activePass },
-      });
-      if (res.ok) {
-        const data = await res.json();
-        if (data.logs) {
-          setLogs(data.logs);
-        }
-      }
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setLogsLoading(false);
-    }
-  };
-
   // Handle local file picker for product images
   const handleImageFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
