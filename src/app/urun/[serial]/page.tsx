@@ -275,7 +275,7 @@ export default function ProductDetailPage({
 
         {/* Main Product Layout: Gallery & Details */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
-          
+
           {/* LEFT: Photography Showcase */}
           <div className="lg:col-span-6 space-y-4">
             {/* Main Stage Image */}
@@ -301,11 +301,10 @@ export default function ProductDetailPage({
                 <button
                   key={idx}
                   onClick={() => setSelectedImage(img)}
-                  className={`relative aspect-square rounded-xl overflow-hidden bg-[#161411] border transition-all duration-300 ${
-                    selectedImage === img
+                  className={`relative aspect-square rounded-xl overflow-hidden bg-[#161411] border transition-all duration-300 ${selectedImage === img
                       ? "border-[#c9a45e] ring-2 ring-[#c9a45e]/40 shadow-lg scale-102"
                       : "border-[#c9a45e]/20 opacity-70 hover:opacity-100 hover:border-[#c9a45e]/50"
-                  }`}
+                    }`}
                 >
                   <Image
                     src={img}
@@ -319,20 +318,7 @@ export default function ProductDetailPage({
             </div>
 
             {/* Highlights List */}
-            <div className="p-6 rounded-2xl bg-[#161411]/60 border border-[#c9a45e]/15 space-y-3 mt-6">
-              <h4 className="text-xs uppercase tracking-[0.2em] text-[#c9a45e] font-semibold flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5" />
-                Öne Çıkan Özellikler
-              </h4>
-              <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs text-[#a69e92]">
-                {product.highlights.map((h, i) => (
-                  <li key={i} className="flex items-center gap-2">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#c9a45e]" />
-                    <span>{h}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
+
           </div>
 
           {/* RIGHT: Detailed Specifications & Craftsmanship */}
@@ -424,52 +410,6 @@ export default function ProductDetailPage({
                   </span>
                 </div>
 
-                <div className="p-3.5 rounded-xl bg-[#161411] border border-[#c9a45e]/15">
-                  <span className="text-[11px] uppercase tracking-wider text-[#736c62] block">
-                    Dizim İpliği
-                  </span>
-                  <span className="text-xs text-[#f5f2eb] font-medium block mt-0.5">
-                    {product.specs.thread}
-                  </span>
-                </div>
-
-                <div className="p-3.5 rounded-xl bg-[#161411] border border-[#c9a45e]/15">
-                  <span className="text-[11px] uppercase tracking-wider text-[#736c62] block">
-                    Menşe & Üretim Yılı
-                  </span>
-                  <span className="text-xs text-[#f5f2eb] font-medium block mt-0.5">
-                    {product.specs.productionYear} · {product.specs.origin}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Step-by-Step Craftsmanship Breakdown */}
-            <div className="space-y-4 pt-4 border-t border-[#c9a45e]/15">
-              <h3 className="text-xs uppercase tracking-[0.2em] text-[#c9a45e] font-semibold flex items-center gap-1.5">
-                <Hammer className="w-4 h-4" />
-                Usta İşçilik Süreci
-              </h3>
-
-              <div className="space-y-3">
-                {product.craftSteps.map((step, idx) => (
-                  <div
-                    key={idx}
-                    className="p-4 rounded-xl bg-[#161411]/70 border border-[#c9a45e]/15 flex items-start gap-3.5"
-                  >
-                    <span className="w-6 h-6 rounded-full bg-[#c9a45e]/20 border border-[#c9a45e]/40 text-[#c9a45e] text-xs font-mono font-bold flex items-center justify-center shrink-0">
-                      {idx + 1}
-                    </span>
-                    <div className="space-y-1">
-                      <h4 className="text-xs uppercase tracking-wider text-[#f5f2eb] font-semibold">
-                        {step.title}
-                      </h4>
-                      <p className="text-xs text-[#a69e92] font-light leading-relaxed">
-                        {step.description}
-                      </p>
-                    </div>
-                  </div>
-                ))}
               </div>
             </div>
 
