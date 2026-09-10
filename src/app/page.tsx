@@ -1,60 +1,61 @@
 import Image from "next/image";
 import Navbar from "@/components/Navbar";
-import Hero from "@/components/Hero";
-import PhotoGallery from "@/components/PhotoGallery";
-import CraftSection from "@/components/CraftSection";
-import RecentWorks from "@/components/RecentWorks";
 import Footer from "@/components/Footer";
 import SerialSearch from "@/components/SerialSearch";
-import { Sparkles, QrCode } from "lucide-react";
+import { Sparkles, ShieldCheck } from "lucide-react";
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-[#0d0c0a] text-[#f5f2eb]">
+    <main className="min-h-screen bg-[#0a0908] text-[#f5f2eb] flex flex-col justify-between relative">
       <Navbar />
 
-      {/* 1. Hero with background & primary search */}
-      <Hero />
+      {/* Hero & Centered Serial Verification */}
+      <section className="relative pt-36 pb-20 px-6 sm:px-8 flex-1 flex items-center justify-center">
+        {/* Crisp, ultra-clean subtle background grid & vignette (No blurry distractions) */}
+        <div className="absolute inset-0 bg-[radial-gradient(#c9a45e_1px,transparent_1px)] [background-size:32px_32px] opacity-[0.035] pointer-events-none" />
+        <div className="absolute inset-0 bg-radial from-transparent via-[#0a0908]/80 to-[#0a0908] pointer-events-none" />
 
-      {/* 2. Photo Gallery (Lots of photos, minimal text) */}
-      <PhotoGallery />
-
-      {/* 3. Artisan Craft & Philosophy */}
-      <CraftSection />
-
-      {/* 4. Dedicated Serial & QR Lookup Section */}
-      <section id="dogrulama" className="py-24 bg-[#12100d] relative overflow-hidden border-y border-[#c9a45e]/15">
-        <div className="absolute inset-0 bg-radial from-[#c9a45e]/5 via-transparent to-transparent pointer-events-none" />
-        <div className="max-w-7xl mx-auto px-6 sm:px-8 relative z-10">
-          <div className="text-center max-w-2xl mx-auto mb-12 space-y-4">
-            {/* Seal & Signature Badge */}
-            <div className="mx-auto relative w-20 h-28 sm:w-24 sm:h-32 rounded-2xl overflow-hidden border border-[#c9a45e]/35 shadow-2xl bg-[#070706] group hover:border-[#c9a45e]/70 transition-colors">
+        <div className="max-w-3xl mx-auto w-full relative z-10 space-y-8 text-center">
+          {/* Logo Mührü */}
+          <div className="mx-auto relative w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden border border-[#c9a45e]/40 shadow-2xl bg-[#12100d] p-1">
+            <div className="relative w-full h-full rounded-full overflow-hidden">
               <Image
-                src="/images/main_logo_signature.jpg"
-                alt="Ali Sıralıoğlu İmzalı Mühür"
+                src="/images/main_logo.jpg"
+                alt="Ali Sıralıoğlu Mühür"
                 fill
-                sizes="100px"
+                priority
+                sizes="96px"
                 className="object-cover"
               />
             </div>
+          </div>
 
-            <span className="text-[11px] uppercase tracking-[0.28em] text-[#c9a45e] font-semibold flex items-center justify-center gap-1.5">
-              <QrCode className="w-3.5 h-3.5" />
-              Dijital Kimlik Merkezi
-            </span>
-            <h2 className="font-serif text-3xl sm:text-5xl font-light text-[#f5f2eb]">
-              Eserinizi Doğrulayın
-            </h2>
-            <p className="text-xs sm:text-sm text-[#a69e92] font-light leading-relaxed">
-              Her Ali Sıralıoğlu tespihi tekildir. Eserinizin kutusundaki QR kodu kameranızla okutabilir veya seri numarasını aşağıdan arayarak tam sertifikasına erişebilirsiniz.
+          <div className="space-y-3 max-w-xl mx-auto">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#161411] border border-[#c9a45e]/30 text-[#d9bf87] text-[11px] uppercase tracking-[0.25em] font-medium shadow-sm">
+              <ShieldCheck className="w-3.5 h-3.5 text-[#c9a45e]" />
+              <span>Orijinallik & Eser Doğrulama</span>
+            </div>
+
+            <h1 className="font-serif text-3xl sm:text-5xl font-normal text-[#f5f2eb] tracking-wide leading-tight">
+              Ali Sıralıoğlu
+            </h1>
+
+            <p className="text-sm sm:text-base text-[#c9a45e] font-serif italic">
+              Kişiye ve Koleksiyona Özel Zanaat Eserleri
+            </p>
+
+            <p className="text-xs sm:text-sm text-[#a69e92] font-normal leading-relaxed pt-1">
+              Eserinizin sertifika kartındaki veya kutusundaki seri numarasını girerek esere ait orijinallik kaydına ve usta detaylarına ulaşabilirsiniz.
             </p>
           </div>
 
-          <SerialSearch />
+          {/* Dedicated Serial Search Box */}
+          <div id="dogrulama" className="pt-2">
+            <SerialSearch />
+          </div>
         </div>
       </section>
 
-      {/* 6. Footer */}
       <Footer />
     </main>
   );

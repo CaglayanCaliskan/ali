@@ -22,7 +22,7 @@ import {
   Copy,
   Check,
 } from "lucide-react";
-import { getProductBySerial, getAllProducts } from "@/data/products";
+import { getProductBySerial, getAllProducts, TesbihProduct } from "@/data/products";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
@@ -33,17 +33,37 @@ export default function ProductDetailPage({
 }) {
   const resolvedParams = use(params);
   const serial = decodeURIComponent(resolvedParams.serial || "").toUpperCase();
-  const product = getProductBySerial(serial);
 
-  const [selectedImage, setSelectedImage] = useState<string>(
-    product?.featuredImage || "/images/product1.jpg"
-  );
+  const [product, setProduct] = useState<TesbihProduct | null>(() => getProductBySerial(serial));
+  const [loading, setLoading] = useState(true);
+  const [selectedImage, setSelectedImage] = useState<string>("/images/product1.jpg");
   const [copied, setCopied] = useState(false);
   const [showQRModal, setShowQRModal] = useState(false);
   const certRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    async function loadData() {
+      try {
+        const res = await fetch(`/api/products?serial=${encodeURIComponent(serial)}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.product) {
+            setProduct(data.product);
+            setSelectedImage(data.product.featuredImage || data.product.images?.[0] || "/images/product1.jpg");
+          }
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadData();
+  }, [serial]);
+
+  useEffect(() => {
     if (product) {
+      setSelectedImage(product.featuredImage || product.images?.[0] || "/images/product1.jpg");
       // Fire subtle gold/amber celebratory confetti
       try {
         confetti({
@@ -73,8 +93,21 @@ export default function ProductDetailPage({
   };
 
   // ----------------------------------------------------
-  // NOT FOUND STATE
+  // LOADING / NOT FOUND STATE
   // ----------------------------------------------------
+  if (loading && !product) {
+    return (
+      <main className="min-h-screen bg-[#0d0c0a] text-[#f5f2eb]">
+        <Navbar />
+        <div className="max-w-3xl mx-auto px-6 pt-40 pb-24 text-center space-y-4">
+          <div className="w-10 h-10 border-2 border-[#c9a45e] border-t-transparent rounded-full animate-spin mx-auto" />
+          <p className="text-xs uppercase tracking-widest text-[#a69e92]">Eser Doğrulanıyor...</p>
+        </div>
+        <Footer />
+      </main>
+    );
+  }
+
   if (!product) {
     const all = getAllProducts();
     return (
@@ -484,19 +517,32 @@ export default function ProductDetailPage({
             </div>
 
             <div className="bg-white p-6 rounded-2xl inline-block shadow-inner">
-              <QRCodeSVG value={shareUrl} size={200} level="H" />
+              <QRCodeSVG id="detail-product-qr-svg" value={shareUrl} size={200} level="H" />
             </div>
 
             <p className="text-xs text-[#a69e92] font-light leading-relaxed">
               Bu QR kod doğrudan <strong>alisiralioglu.com</strong> üzerindeki bu eserin resmi sertifika ve detay sayfasına yönlendirir.
             </p>
 
-            <button
-              onClick={() => setShowQRModal(false)}
-              className="w-full py-3 bg-[#c9a45e] hover:bg-[#d9bf87] text-[#0d0c0a] font-semibold text-xs uppercase tracking-widest rounded-xl transition-colors"
-            >
-              Kapat
-            </button>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowQRModal(false)}
+                className="flex-1 py-2.5 border border-[#c9a45e]/30 text-xs uppercase tracking-wider rounded-xl text-[#a69e92] hover:text-[#f5f2eb]"
+              >
+                Kapat
+              </button>
+              <button
+                onClick={() => {
+                  import("@/lib/clientUtils").then(({ downloadSvgAsPng }) => {
+                    downloadSvgAsPng("detail-product-qr-svg", `QR-${product.serial}.png`);
+                  });
+                }}
+                className="flex-1 py-2.5 bg-[#c9a45e] hover:bg-[#d9bf87] text-[#0d0c0a] font-semibold text-xs uppercase tracking-wider rounded-xl transition-colors flex items-center justify-center gap-1.5 cursor-pointer shadow-lg"
+              >
+                <Printer className="w-3.5 h-3.5" />
+                <span>QR İndir (PNG)</span>
+              </button>
+            </div>
           </div>
         </div>
       )}
