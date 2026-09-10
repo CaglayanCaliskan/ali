@@ -176,11 +176,13 @@ export default function AdminPage() {
     }
   }, []);
 
-  // Fetch products
+  // Fetch products (with cache buster)
   const fetchProducts = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/products");
+      const res = await fetch(`/api/products?t=${Date.now()}`, {
+        cache: "no-store",
+      });
       const data = await res.json();
       if (data.products) {
         setProducts(data.products);
@@ -189,6 +191,28 @@ export default function AdminPage() {
       console.error(e);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Fetch admin activity logs (with cache buster)
+  const fetchLogs = async () => {
+    setLogsLoading(true);
+    const activePass = storedPassword || localStorage.getItem("ali_admin_pass") || "";
+    try {
+      const res = await fetch(`/api/logs?t=${Date.now()}`, {
+        cache: "no-store",
+        headers: { "x-admin-password": activePass },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.logs) {
+          setLogs(data.logs);
+        }
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLogsLoading(false);
     }
   };
 
@@ -283,6 +307,18 @@ export default function AdminPage() {
     }
 
     const activePass = storedPassword || localStorage.getItem("ali_admin_pass") || "";
+    const savedProduct = { ...formData, serial: formData.serial.trim().toUpperCase() };
+
+    // 1. Optimistic UI update for instant feel
+    setProducts((prev) => {
+      const idx = prev.findIndex((p) => p.serial === savedProduct.serial);
+      if (idx >= 0) {
+        const copy = [...prev];
+        copy[idx] = savedProduct;
+        return copy;
+      }
+      return [savedProduct, ...prev];
+    });
 
     try {
       const res = await fetch("/api/products", {
@@ -291,21 +327,26 @@ export default function AdminPage() {
           "Content-Type": "application/json",
           "x-admin-password": activePass,
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(savedProduct),
       });
 
       if (res.ok) {
         setFormMsg({ type: "success", text: "Ürün başarıyla kaydedildi!" });
-        await fetchProducts();
+        // Refresh products and logs in background
+        fetchProducts();
+        fetchLogs();
         setTimeout(() => {
           setIsFormOpen(false);
-        }, 800);
+        }, 600);
       } else {
         const d = await res.json();
         setFormMsg({ type: "error", text: d.error || "Kaydedilemedi." });
+        // Revert on failure
+        fetchProducts();
       }
     } catch {
       setFormMsg({ type: "error", text: "Sunucu hatası oluştu." });
+      fetchProducts();
     }
   };
 
@@ -317,6 +358,9 @@ export default function AdminPage() {
 
     const activePass = storedPassword || localStorage.getItem("ali_admin_pass") || "";
 
+    // 1. Optimistic UI delete: remove from list instantly without waiting
+    setProducts((prev) => prev.filter((p) => p.serial !== serial));
+
     try {
       const res = await fetch(`/api/products?serial=${encodeURIComponent(serial)}`, {
         method: "DELETE",
@@ -326,13 +370,18 @@ export default function AdminPage() {
       });
 
       if (res.ok) {
-        await fetchProducts();
+        // Refresh logs and products in background
+        fetchProducts();
+        fetchLogs();
       } else {
         const d = await res.json().catch(() => ({}));
         alert(d.error || "Silme işlemi başarısız oldu.");
+        // Rollback state if server failed
+        fetchProducts();
       }
     } catch {
       alert("Hata oluştu.");
+      fetchProducts();
     }
   };
 
