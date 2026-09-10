@@ -21,9 +21,12 @@ import {
   AlertCircle,
   Layers,
   Image as ImageIcon,
+  Activity,
+  History,
 } from "lucide-react";
 import { TesbihProduct } from "@/data/products";
 import { downloadSvgAsPng, compressImageFile } from "@/lib/clientUtils";
+import { AdminLogEntry } from "@/lib/storage";
 
 const DEFAULT_PRODUCT_FORM: TesbihProduct = {
   serial: "",
@@ -68,7 +71,10 @@ export default function AdminPage() {
   const [storedPassword, setStoredPassword] = useState("");
 
   const [products, setProducts] = useState<TesbihProduct[]>([]);
+  const [logs, setLogs] = useState<AdminLogEntry[]>([]);
+  const [activeTab, setActiveTab] = useState<"products" | "logs">("products");
   const [loading, setLoading] = useState(false);
+  const [logsLoading, setLogsLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
   // Modal / Form state
@@ -78,6 +84,27 @@ export default function AdminPage() {
   const [formMsg, setFormMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [qrModalProduct, setQrModalProduct] = useState<TesbihProduct | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+
+  // Fetch admin activity logs
+  const fetchLogs = async () => {
+    setLogsLoading(true);
+    const activePass = storedPassword || localStorage.getItem("ali_admin_pass") || "";
+    try {
+      const res = await fetch("/api/logs", {
+        headers: { "x-admin-password": activePass },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.logs) {
+          setLogs(data.logs);
+        }
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLogsLoading(false);
+    }
+  };
 
   // Handle local file picker for product images
   const handleImageFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -168,8 +195,15 @@ export default function AdminPage() {
   useEffect(() => {
     if (isAuthenticated) {
       fetchProducts();
+      fetchLogs();
     }
   }, [isAuthenticated]);
+
+  useEffect(() => {
+    if (isAuthenticated && activeTab === "logs") {
+      fetchLogs();
+    }
+  }, [activeTab, isAuthenticated]);
 
   // Login handler
   const handleLogin = async (e: React.FormEvent) => {
@@ -248,12 +282,14 @@ export default function AdminPage() {
       return;
     }
 
+    const activePass = storedPassword || localStorage.getItem("ali_admin_pass") || "";
+
     try {
       const res = await fetch("/api/products", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "x-admin-password": storedPassword,
+          "x-admin-password": activePass,
         },
         body: JSON.stringify(formData),
       });
@@ -279,18 +315,21 @@ export default function AdminPage() {
       return;
     }
 
+    const activePass = storedPassword || localStorage.getItem("ali_admin_pass") || "";
+
     try {
       const res = await fetch(`/api/products?serial=${encodeURIComponent(serial)}`, {
         method: "DELETE",
         headers: {
-          "x-admin-password": storedPassword,
+          "x-admin-password": activePass,
         },
       });
 
       if (res.ok) {
         await fetchProducts();
       } else {
-        alert("Silme işlemi başarısız oldu.");
+        const d = await res.json().catch(() => ({}));
+        alert(d.error || "Silme işlemi başarısız oldu.");
       }
     } catch {
       alert("Hata oluştu.");
@@ -404,119 +443,242 @@ export default function AdminPage() {
 
       {/* Main Container */}
       <div className="max-w-7xl mx-auto px-6 pt-8 space-y-6">
-        {/* Actions Bar */}
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
-          <div className="relative flex-1 max-w-md">
-            <Search className="w-4 h-4 text-[#c9a45e] absolute left-3.5 top-3.5" />
-            <input
-              type="text"
-              placeholder="Seri no, eser adı veya kategori ara..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-[#161411] border border-[#c9a45e]/25 focus:border-[#c9a45e] text-[#f5f2eb] pl-10 pr-4 py-2.5 rounded-xl outline-none text-xs sm:text-sm placeholder-[#736c62]"
-            />
-          </div>
-
-          <button
-            onClick={handleNewProduct}
-            className="px-5 py-2.5 bg-[#c9a45e] hover:bg-[#d9bf87] text-[#0d0c0a] font-semibold text-xs uppercase tracking-wider rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg cursor-pointer"
-          >
-            <Plus className="w-4 h-4" />
-            <span>Yeni Eser Ekle</span>
-          </button>
-        </div>
-
-        {/* Products Table / Cards */}
-        {loading ? (
-          <div className="text-center py-20 text-[#a69e92] text-sm">
-            Eserler yükleniyor...
-          </div>
-        ) : filteredProducts.length === 0 ? (
-          <div className="text-center py-20 border border-dashed border-[#c9a45e]/20 rounded-2xl p-8 space-y-3">
-            <p className="text-[#a69e92] text-sm">Kayıtlı ürün bulunamadı.</p>
+        {/* Navigation Tabs & Actions Bar */}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 border-b border-[#c9a45e]/15 pb-4">
+          <div className="flex items-center gap-2">
             <button
-              onClick={handleNewProduct}
-              className="text-xs text-[#c9a45e] hover:underline"
+              onClick={() => setActiveTab("products")}
+              className={`px-4 py-2 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all flex items-center gap-2 cursor-pointer ${
+                activeTab === "products"
+                  ? "bg-[#c9a45e] text-[#0d0c0a] shadow-lg"
+                  : "bg-[#161411] border border-[#c9a45e]/25 text-[#a69e92] hover:text-[#f5f2eb]"
+              }`}
             >
-              Hemen yeni bir eser ekleyin
+              <Layers className="w-3.5 h-3.5" />
+              <span>Eserler ({products.length})</span>
+            </button>
+
+            <button
+              onClick={() => {
+                setActiveTab("logs");
+                fetchLogs();
+              }}
+              className={`px-4 py-2 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all flex items-center gap-2 cursor-pointer ${
+                activeTab === "logs"
+                  ? "bg-[#c9a45e] text-[#0d0c0a] shadow-lg"
+                  : "bg-[#161411] border border-[#c9a45e]/25 text-[#a69e92] hover:text-[#f5f2eb]"
+              }`}
+            >
+              <History className="w-3.5 h-3.5" />
+              <span>İşlem Logları ({logs.length})</span>
             </button>
           </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {filteredProducts.map((p) => (
-              <div
-                key={p.serial}
-                className="bg-[#161411] border border-[#c9a45e]/20 hover:border-[#c9a45e]/50 rounded-2xl p-5 space-y-4 transition-all flex flex-col justify-between"
+
+          {activeTab === "products" && (
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+              <div className="relative flex-1 max-w-xs">
+                <Search className="w-3.5 h-3.5 text-[#c9a45e] absolute left-3.5 top-3" />
+                <input
+                  type="text"
+                  placeholder="Seri no veya eser ara..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full bg-[#161411] border border-[#c9a45e]/25 focus:border-[#c9a45e] text-[#f5f2eb] pl-9 pr-3 py-2 rounded-xl outline-none text-xs placeholder-[#736c62]"
+                />
+              </div>
+
+              <button
+                onClick={handleNewProduct}
+                className="px-4 py-2 bg-[#c9a45e] hover:bg-[#d9bf87] text-[#0d0c0a] font-semibold text-xs uppercase tracking-wider rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg cursor-pointer shrink-0"
               >
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="px-2.5 py-0.5 rounded-md bg-[#c9a45e]/15 border border-[#c9a45e]/30 text-[#c9a45e] text-[11px] font-mono font-bold">
-                      {p.serial}
-                    </span>
-                    <span className="text-[11px] text-[#736c62]">
-                      {p.specs.productionYear}
-                    </span>
+                <Plus className="w-3.5 h-3.5" />
+                <span>Yeni Eser Ekle</span>
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* TAB 1: PRODUCTS LIST */}
+        {activeTab === "products" && (
+          <>
+            {loading ? (
+              <div className="text-center py-20 text-[#a69e92] text-sm">
+                Eserler yükleniyor...
+              </div>
+            ) : filteredProducts.length === 0 ? (
+              <div className="text-center py-20 border border-dashed border-[#c9a45e]/20 rounded-2xl p-8 space-y-3">
+                <p className="text-[#a69e92] text-sm">Kayıtlı ürün bulunamadı.</p>
+                <button
+                  onClick={handleNewProduct}
+                  className="text-xs text-[#c9a45e] hover:underline cursor-pointer"
+                >
+                  Hemen yeni bir eser ekleyin
+                </button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                {filteredProducts.map((p) => (
+                  <div
+                    key={p.serial}
+                    className="bg-[#161411] border border-[#c9a45e]/20 hover:border-[#c9a45e]/50 rounded-2xl p-5 space-y-4 transition-all flex flex-col justify-between"
+                  >
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="px-2.5 py-0.5 rounded-md bg-[#c9a45e]/15 border border-[#c9a45e]/30 text-[#c9a45e] text-[11px] font-mono font-bold">
+                          {p.serial}
+                        </span>
+                        <span className="text-[11px] text-[#736c62]">
+                          {p.specs.productionYear}
+                        </span>
+                      </div>
+
+                      <div className="space-y-1">
+                        <h3 className="font-serif text-lg text-[#f5f2eb] leading-snug line-clamp-1">
+                          {p.name}
+                        </h3>
+                        <p className="text-xs text-[#d9bf87] line-clamp-1 italic font-serif">
+                          {p.subtitle || p.category}
+                        </p>
+                      </div>
+
+                      <p className="text-xs text-[#a69e92] line-clamp-2 leading-relaxed">
+                        {p.description}
+                      </p>
+
+                      <div className="text-[11px] text-[#736c62] space-y-0.5 pt-2 border-t border-[#c9a45e]/10">
+                        <div>Malzeme: <span className="text-[#a69e92]">{p.specs.material}</span></div>
+                        <div>Habbe: <span className="text-[#a69e92]">{p.specs.beadCount} ({p.specs.beadSize})</span></div>
+                      </div>
+                    </div>
+
+                    <div className="pt-4 border-t border-[#c9a45e]/15 flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-1.5">
+                        <Link
+                          href={`/urun/${p.serial}`}
+                          target="_blank"
+                          className="p-2 rounded-lg bg-[#0d0c0a] hover:bg-[#1c1915] border border-[#c9a45e]/20 text-[#c9a45e] text-xs transition-colors"
+                          title="Özel Doğrulama Sayfasını Gör"
+                        >
+                          <ExternalLink className="w-3.5 h-3.5" />
+                        </Link>
+
+                        <button
+                          onClick={() => setQrModalProduct(p)}
+                          className="p-2 rounded-lg bg-[#0d0c0a] hover:bg-[#1c1915] border border-[#c9a45e]/20 text-[#d9bf87] text-xs transition-colors cursor-pointer"
+                          title="QR Kod İndir"
+                        >
+                          <Download className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          onClick={() => handleEditProduct(p)}
+                          className="px-3 py-1.5 rounded-lg bg-[#1c1915] hover:bg-[#c9a45e]/20 border border-[#c9a45e]/30 text-[#f5f2eb] text-xs flex items-center gap-1 transition-colors cursor-pointer"
+                        >
+                          <Edit3 className="w-3 h-3 text-[#c9a45e]" />
+                          <span>Düzenle</span>
+                        </button>
+
+                        <button
+                          onClick={() => handleDelete(p.serial)}
+                          className="p-2 rounded-lg bg-rose-950/30 hover:bg-rose-900/50 border border-rose-800/30 text-rose-400 text-xs transition-colors cursor-pointer"
+                          title="Eseri Sil"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
                   </div>
+                ))}
+              </div>
+            )}
+          </>
+        )}
 
-                  <div className="space-y-1">
-                    <h3 className="font-serif text-lg text-[#f5f2eb] leading-snug line-clamp-1">
-                      {p.name}
-                    </h3>
-                    <p className="text-xs text-[#d9bf87] line-clamp-1 italic font-serif">
-                      {p.subtitle || p.category}
-                    </p>
-                  </div>
+        {/* TAB 2: AUDIT LOGS LIST */}
+        {activeTab === "logs" && (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-sm font-semibold text-[#f5f2eb] flex items-center gap-2">
+                  <Activity className="w-4 h-4 text-[#c9a45e]" />
+                  <span>Admin İşlem Geçmişi (Denetim Kayıtları)</span>
+                </h3>
+                <p className="text-xs text-[#a69e92]">
+                  Yapılan tüm ürün ekleme, güncelleme ve silme işlemleri anlık olarak burada listelenir.
+                </p>
+              </div>
 
-                  <p className="text-xs text-[#a69e92] line-clamp-2 leading-relaxed">
-                    {p.description}
-                  </p>
+              <button
+                onClick={fetchLogs}
+                disabled={logsLoading}
+                className="px-3 py-1.5 rounded-xl border border-[#c9a45e]/30 bg-[#161411] hover:bg-[#1c1915] text-[#d9bf87] text-xs transition-colors cursor-pointer"
+              >
+                {logsLoading ? "Yenileniyor..." : "Yenile"}
+              </button>
+            </div>
 
-                  <div className="text-[11px] text-[#736c62] space-y-0.5 pt-2 border-t border-[#c9a45e]/10">
-                    <div>Malzeme: <span className="text-[#a69e92]">{p.specs.material}</span></div>
-                    <div>Habbe: <span className="text-[#a69e92]">{p.specs.beadCount} ({p.specs.beadSize})</span></div>
-                  </div>
-                </div>
-
-                <div className="pt-4 border-t border-[#c9a45e]/15 flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-1.5">
-                    <Link
-                      href={`/urun/${p.serial}`}
-                      target="_blank"
-                      className="p-2 rounded-lg bg-[#0d0c0a] hover:bg-[#1c1915] border border-[#c9a45e]/20 text-[#c9a45e] text-xs transition-colors"
-                      title="Özel Doğrulama Sayfasını Gör"
-                    >
-                      <ExternalLink className="w-3.5 h-3.5" />
-                    </Link>
-
-                    <button
-                      onClick={() => setQrModalProduct(p)}
-                      className="p-2 rounded-lg bg-[#0d0c0a] hover:bg-[#1c1915] border border-[#c9a45e]/20 text-[#d9bf87] text-xs transition-colors cursor-pointer"
-                      title="QR Kod İndir"
-                    >
-                      <Download className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-
-                  <div className="flex items-center gap-1.5">
-                    <button
-                      onClick={() => handleEditProduct(p)}
-                      className="px-3 py-1.5 rounded-lg bg-[#1c1915] hover:bg-[#c9a45e]/20 border border-[#c9a45e]/30 text-[#f5f2eb] text-xs flex items-center gap-1 transition-colors cursor-pointer"
-                    >
-                      <Edit3 className="w-3 h-3 text-[#c9a45e]" />
-                      <span>Düzenle</span>
-                    </button>
-
-                    <button
-                      onClick={() => handleDelete(p.serial)}
-                      className="p-2 rounded-lg bg-rose-950/30 hover:bg-rose-900/50 border border-rose-800/30 text-rose-400 text-xs transition-colors cursor-pointer"
-                      title="Eseri Sil"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
+            {logsLoading ? (
+              <div className="text-center py-16 text-[#a69e92] text-xs">
+                Loglar yükleniyor...
+              </div>
+            ) : logs.length === 0 ? (
+              <div className="text-center py-16 border border-dashed border-[#c9a45e]/20 rounded-2xl p-8 space-y-2">
+                <p className="text-[#a69e92] text-xs">Henüz kayıtlı bir işlem geçmişi bulunmuyor.</p>
+              </div>
+            ) : (
+              <div className="bg-[#161411] border border-[#c9a45e]/20 rounded-2xl overflow-hidden shadow-xl">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs">
+                    <thead className="bg-[#1c1915] border-b border-[#c9a45e]/15 text-[#c9a45e] uppercase tracking-wider text-[11px]">
+                      <tr>
+                        <th className="py-3.5 px-4 font-semibold">Tarih / Saat</th>
+                        <th className="py-3.5 px-4 font-semibold">İşlem Türü</th>
+                        <th className="py-3.5 px-4 font-semibold">Seri No</th>
+                        <th className="py-3.5 px-4 font-semibold">Eser Adı</th>
+                        <th className="py-3.5 px-4 font-semibold">Detay</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-[#c9a45e]/10 text-[#f5f2eb]">
+                      {logs.map((log) => (
+                        <tr key={log.id} className="hover:bg-[#1c1915]/50 transition-colors">
+                          <td className="py-3.5 px-4 font-mono text-[#a69e92] whitespace-nowrap">
+                            {log.timestamp}
+                          </td>
+                          <td className="py-3.5 px-4 whitespace-nowrap">
+                            <span
+                              className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
+                                log.action === "CREATE"
+                                  ? "bg-emerald-950/70 border border-emerald-800/60 text-emerald-400"
+                                  : log.action === "UPDATE"
+                                  ? "bg-amber-950/70 border border-amber-800/60 text-amber-400"
+                                  : "bg-rose-950/70 border border-rose-800/60 text-rose-400"
+                              }`}
+                            >
+                              {log.action === "CREATE"
+                                ? "Yeni Eklendi"
+                                : log.action === "UPDATE"
+                                ? "Güncellendi"
+                                : "Silindi"}
+                            </span>
+                          </td>
+                          <td className="py-3.5 px-4 font-mono font-semibold text-[#c9a45e] whitespace-nowrap">
+                            {log.serial}
+                          </td>
+                          <td className="py-3.5 px-4 font-serif font-medium text-[#f5f2eb]">
+                            {log.productName}
+                          </td>
+                          <td className="py-3.5 px-4 text-[#a69e92] max-w-xs truncate">
+                            {log.details || "-"}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               </div>
-            ))}
+            )}
           </div>
         )}
       </div>
