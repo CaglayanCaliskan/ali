@@ -39,11 +39,7 @@ export default function Footer() {
               Hızlı Erişim
             </h4>
             <ul className="space-y-2 text-xs font-light">
-              <li>
-                <Link href="/#galeri" className="hover:text-[#f5f2eb] transition-colors">
-                  Koleksiyon Galerisi
-                </Link>
-              </li>
+
               <li>
                 <Link href="/#zanaat" className="hover:text-[#f5f2eb] transition-colors">
                   Zanaat & Yapım Aşamaları

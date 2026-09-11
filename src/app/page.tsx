@@ -2,16 +2,22 @@ import Image from "next/image";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import SerialSearch from "@/components/SerialSearch";
-import { Sparkles, ShieldCheck } from "lucide-react";
+import CraftSection from "@/components/CraftSection";
+import { ShieldCheck } from "lucide-react";
 
 export default function Home() {
   return (
     <main className="min-h-screen bg-[#0a0908] text-[#f5f2eb] flex flex-col justify-between relative">
       <Navbar />
 
+      {/* Zanaat & Felsefe — üst bölüm */}
+      <div className="pt-24">
+        <CraftSection />
+      </div>
+
       {/* Hero & Centered Serial Verification */}
-      <section className="relative pt-36 pb-20 px-6 sm:px-8 flex-1 flex items-center justify-center">
-        {/* Crisp, ultra-clean subtle background grid & vignette (No blurry distractions) */}
+      <section id="dogrulama" className="relative py-20 px-6 sm:px-8 flex-1 flex items-center justify-center">
+        {/* Subtle background grid & vignette */}
         <div className="absolute inset-0 bg-[radial-gradient(#c9a45e_1px,transparent_1px)] [background-size:32px_32px] opacity-[0.035] pointer-events-none" />
         <div className="absolute inset-0 bg-radial from-transparent via-[#0a0908]/80 to-[#0a0908] pointer-events-none" />
 
@@ -33,7 +39,7 @@ export default function Home() {
           <div className="space-y-3 max-w-xl mx-auto">
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#161411] border border-[#c9a45e]/30 text-[#d9bf87] text-[11px] uppercase tracking-[0.25em] font-medium shadow-sm">
               <ShieldCheck className="w-3.5 h-3.5 text-[#c9a45e]" />
-              <span>Orijinallik & Eser Doğrulama</span>
+              <span>Orijinallik &amp; Eser Doğrulama</span>
             </div>
 
             <h1 className="font-serif text-3xl sm:text-5xl font-normal text-[#f5f2eb] tracking-wide leading-tight">
@@ -50,7 +56,7 @@ export default function Home() {
           </div>
 
           {/* Dedicated Serial Search Box */}
-          <div id="dogrulama" className="pt-2">
+          <div className="pt-2">
             <SerialSearch />
           </div>
         </div>
