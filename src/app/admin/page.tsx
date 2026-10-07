@@ -238,12 +238,22 @@ export default function AdminPage() {
     setIsAuthenticated(false);
   };
 
+  // Generate Unique Serial Helper (Format: AS26-1234 -> AS + 2 haneli yıl + '-' + 4 haneli benzersiz kod)
+  const generateUniqueSerial = (existingList: TesbihProduct[] = products) => {
+    const year2Digits = String(new Date().getFullYear()).slice(-2);
+    let candidate = "";
+    let attempts = 0;
+    do {
+      const randomCode = Math.floor(1000 + Math.random() * 9000).toString();
+      candidate = `AS${year2Digits}-${randomCode}`;
+      attempts++;
+    } while (existingList.some((p) => p.serial?.toUpperCase() === candidate) && attempts < 1000);
+    return candidate;
+  };
+
   // Generate Serial Helper
   const generateSerial = () => {
-    const year = new Date().getFullYear();
-    const count = products.length + 1;
-    const padded = String(count).padStart(3, "0");
-    const suggestedSerial = `AS-${year}-${padded}`;
+    const suggestedSerial = generateUniqueSerial(products);
     const suggestedCert = `AS-CERT-${Math.floor(1000 + Math.random() * 9000)}`;
 
     setFormData((prev) => ({
@@ -257,9 +267,7 @@ export default function AdminPage() {
   const handleNewProduct = () => {
     setEditingSerial(null);
     const newForm = { ...DEFAULT_PRODUCT_FORM };
-    const year = new Date().getFullYear();
-    const count = products.length + 1;
-    newForm.serial = `AS-${year}-${String(count).padStart(3, "0")}`;
+    newForm.serial = generateUniqueSerial(products);
     newForm.certificateNo = `AS-CERT-${Math.floor(1000 + Math.random() * 9000)}`;
     newForm.certificateDate = new Date().toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric" });
     setFormData(newForm);
@@ -779,7 +787,7 @@ export default function AdminPage() {
                       required
                       value={formData.serial}
                       onChange={(e) => setFormData({ ...formData, serial: e.target.value.toUpperCase() })}
-                      placeholder="Örn: AS-2024-005"
+                      placeholder="Örn: AS26-1234"
                       className="w-full bg-[#0d0c0a] border border-[#c9a45e]/25 px-3 py-2 rounded-xl text-[#f5f2eb] font-mono outline-none focus:border-[#c9a45e]"
                     />
                   </div>

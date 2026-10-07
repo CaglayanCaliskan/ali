@@ -48,7 +48,7 @@ export default function SerialSearch({ compact = false }: SerialSearchProps) {
               setSerial(e.target.value);
               if (error) setError(null);
             }}
-            placeholder="Seri No girin (Örn: AS-2024-001)"
+            placeholder="Seri No girin (Örn: AS26-1234)"
             className="w-full bg-[#161411]/90 border border-[#c9a45e]/30 focus:border-[#c9a45e] text-[#f5f2eb] placeholder-[#736c62] text-sm tracking-wider uppercase px-4 py-3 pr-24 rounded-lg outline-none transition-all"
           />
           <button
@@ -90,7 +90,7 @@ export default function SerialSearch({ compact = false }: SerialSearchProps) {
                   setSerial(e.target.value);
                   if (error) setError(null);
                 }}
-                placeholder="Örn: AS-2024-001"
+                placeholder="Örn: AS26-1234"
                 className="w-full bg-[#0a0908] border border-[#c9a45e]/35 focus:border-[#c9a45e] focus:ring-1 focus:ring-[#c9a45e]/50 text-[#f5f2eb] placeholder-[#8c8273] text-sm sm:text-base tracking-widest uppercase pl-12 pr-4 py-3.5 rounded-xl outline-none transition-all font-mono"
               />
             </div>
