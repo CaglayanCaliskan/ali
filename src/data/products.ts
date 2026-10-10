@@ -38,7 +38,19 @@ export const PRODUCTS: Record<string, TesbihProduct> = {};
 
 export function getProductBySerial(serial: string): TesbihProduct | null {
   const normalized = serial.trim().toUpperCase();
-  return PRODUCTS[normalized] || null;
+  if (PRODUCTS[normalized]) return PRODUCTS[normalized];
+
+  const withDash = normalized.replace(/[/]/g, "-");
+  if (PRODUCTS[withDash]) return PRODUCTS[withDash];
+
+  const withSlash = normalized.replace(/[-]/g, "/");
+  if (PRODUCTS[withSlash]) return PRODUCTS[withSlash];
+
+  const noSep = normalized.replace(/[-/]/g, "");
+  const found = Object.values(PRODUCTS).find(
+    (p) => p.serial.toUpperCase().replace(/[-/]/g, "") === noSep
+  );
+  return found || null;
 }
 
 export function getAllProducts(): TesbihProduct[] {

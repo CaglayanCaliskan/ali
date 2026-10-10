@@ -124,7 +124,20 @@ export async function getAllProductsData(): Promise<Record<string, TesbihProduct
 export async function getProductDataBySerial(serial: string): Promise<TesbihProduct | null> {
   const normalized = serial.trim().toUpperCase();
   const all = await getAllProductsData();
-  return all[normalized] || null;
+
+  if (all[normalized]) return all[normalized];
+
+  const withDash = normalized.replace(/[/]/g, "-");
+  if (all[withDash]) return all[withDash];
+
+  const withSlash = normalized.replace(/[-]/g, "/");
+  if (all[withSlash]) return all[withSlash];
+
+  const noSep = normalized.replace(/[-/]/g, "");
+  const found = Object.values(all).find(
+    (p) => p.serial.toUpperCase().replace(/[-/]/g, "") === noSep
+  );
+  return found || null;
 }
 
 export async function saveProductData(product: TesbihProduct): Promise<void> {

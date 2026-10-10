@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { QRCodeSVG } from "qrcode.react";
@@ -81,6 +81,10 @@ export default function AdminPage() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingSerial, setEditingSerial] = useState<string | null>(null);
   const [formData, setFormData] = useState<TesbihProduct>(DEFAULT_PRODUCT_FORM);
+  const [adminSerialP1, setAdminSerialP1] = useState("");
+  const [adminSerialP2, setAdminSerialP2] = useState("");
+  const adminSerialPart1Ref = useRef<HTMLInputElement>(null);
+  const adminSerialPart2Ref = useRef<HTMLInputElement>(null);
   const [formMsg, setFormMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [qrModalProduct, setQrModalProduct] = useState<TesbihProduct | null>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -254,6 +258,9 @@ export default function AdminPage() {
   // Generate Serial Helper
   const generateSerial = () => {
     const suggestedSerial = generateUniqueSerial(products);
+    const [s1, s2] = suggestedSerial.split("-");
+    setAdminSerialP1(s1 || "");
+    setAdminSerialP2(s2 || "");
     const suggestedCert = `AS-CERT-${Math.floor(1000 + Math.random() * 9000)}`;
 
     setFormData((prev) => ({
@@ -267,7 +274,11 @@ export default function AdminPage() {
   const handleNewProduct = () => {
     setEditingSerial(null);
     const newForm = { ...DEFAULT_PRODUCT_FORM };
-    newForm.serial = generateUniqueSerial(products);
+    const generated = generateUniqueSerial(products);
+    const [g1, g2] = generated.split("-");
+    setAdminSerialP1(g1 || "");
+    setAdminSerialP2(g2 || "");
+    newForm.serial = generated;
     newForm.certificateNo = `AS-CERT-${Math.floor(1000 + Math.random() * 9000)}`;
     newForm.certificateDate = new Date().toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric" });
     setFormData(newForm);
@@ -278,6 +289,9 @@ export default function AdminPage() {
   // Open modal for editing
   const handleEditProduct = (prod: TesbihProduct) => {
     setEditingSerial(prod.serial);
+    const parts = (prod.serial || "").split(/[-/ ]/);
+    setAdminSerialP1(parts[0] || "");
+    setAdminSerialP2(parts.slice(1).join("") || "");
     setFormData(JSON.parse(JSON.stringify(prod)));
     setFormMsg(null);
     setIsFormOpen(true);
@@ -288,13 +302,17 @@ export default function AdminPage() {
     e.preventDefault();
     setFormMsg(null);
 
-    if (!formData.serial.trim() || !formData.name.trim()) {
-      setFormMsg({ type: "error", text: "Lütfen seri no ve ürün adını doldurunuz." });
+    const cleanP1 = adminSerialP1.trim().toUpperCase();
+    const cleanP2 = adminSerialP2.trim().toUpperCase();
+    const finalSerial = `${cleanP1}-${cleanP2}`;
+
+    if (!cleanP1 || !cleanP2 || !formData.name.trim()) {
+      setFormMsg({ type: "error", text: "Lütfen 8 haneli seri numarasını eksiksiz giriniz ve ürün adını doldurunuz (Örn: AS26-1234)." });
       return;
     }
 
     const activePass = storedPassword || localStorage.getItem("ali_admin_pass") || "";
-    const savedProduct = { ...formData, serial: formData.serial.trim().toUpperCase() };
+    const savedProduct = { ...formData, serial: finalSerial };
 
     // 1. Optimistic UI update for instant feel
     setProducts((prev) => {
@@ -782,14 +800,86 @@ export default function AdminPage() {
                         </button>
                       )}
                     </div>
-                    <input
-                      type="text"
-                      required
-                      value={formData.serial}
-                      onChange={(e) => setFormData({ ...formData, serial: e.target.value.toUpperCase() })}
-                      placeholder="Örn: AS26-1234"
-                      className="w-full bg-[#0d0c0a] border border-[#c9a45e]/25 px-3 py-2 rounded-xl text-[#f5f2eb] font-mono outline-none focus:border-[#c9a45e]"
-                    />
+                    <div className="flex items-center bg-[#0d0c0a] border border-[#c9a45e]/25 focus-within:border-[#c9a45e] focus-within:ring-1 focus-within:ring-[#c9a45e]/30 rounded-xl px-3 py-1.5 transition-all">
+                      <input
+                        ref={adminSerialPart1Ref}
+                        type="text"
+                        required
+                        maxLength={4}
+                        value={adminSerialP1}
+                        onChange={(e) => {
+                          const clean = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 4);
+                          setAdminSerialP1(clean);
+                          setFormData((prev) => ({ ...prev, serial: `${clean}-${adminSerialP2}` }));
+                          if (clean.length === 4) {
+                            adminSerialPart2Ref.current?.focus();
+                          }
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === "-" || e.key === "/" || e.key === " " || e.key === "ArrowRight") {
+                            if (adminSerialP1.length > 0) {
+                              e.preventDefault();
+                              adminSerialPart2Ref.current?.focus();
+                            }
+                          }
+                        }}
+                        onPaste={(e) => {
+                          e.preventDefault();
+                          const clean = e.clipboardData.getData("text").toUpperCase().replace(/[^A-Z0-9]/g, "");
+                          const p1 = clean.slice(0, 4);
+                          const p2 = clean.slice(4, 8);
+                          setAdminSerialP1(p1);
+                          setAdminSerialP2(p2);
+                          setFormData((prev) => ({ ...prev, serial: `${p1}-${p2}` }));
+                          if (p1.length === 4) {
+                            adminSerialPart2Ref.current?.focus();
+                          }
+                        }}
+                        placeholder="AS26"
+                        className="w-16 sm:w-20 text-center bg-transparent text-[#f5f2eb] placeholder-[#736c62] font-mono font-bold uppercase tracking-wider outline-none py-1"
+                      />
+                      <span className="text-[#c9a45e] font-mono text-base font-bold px-1.5 select-none opacity-80">
+                        -
+                      </span>
+                      <input
+                        ref={adminSerialPart2Ref}
+                        type="text"
+                        required
+                        maxLength={4}
+                        value={adminSerialP2}
+                        onChange={(e) => {
+                          const clean = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 4);
+                          setAdminSerialP2(clean);
+                          setFormData((prev) => ({ ...prev, serial: `${adminSerialP1}-${clean}` }));
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === "Backspace" && adminSerialP2.length === 0) {
+                            e.preventDefault();
+                            adminSerialPart1Ref.current?.focus();
+                          } else if (e.key === "ArrowLeft") {
+                            const target = e.target as HTMLInputElement;
+                            if (target.selectionStart === 0 && target.selectionEnd === 0) {
+                              e.preventDefault();
+                              adminSerialPart1Ref.current?.focus();
+                            }
+                          }
+                        }}
+                        onPaste={(e) => {
+                          e.preventDefault();
+                          const clean = e.clipboardData.getData("text").toUpperCase().replace(/[^A-Z0-9]/g, "");
+                          const p1 = clean.slice(0, 4);
+                          const p2 = clean.slice(4, 8);
+                          setAdminSerialP1(p1);
+                          setAdminSerialP2(p2);
+                          setFormData((prev) => ({ ...prev, serial: `${p1}-${p2}` }));
+                          if (p1.length === 4) {
+                            adminSerialPart2Ref.current?.focus();
+                          }
+                        }}
+                        placeholder="1234"
+                        className="w-16 sm:w-20 text-center bg-transparent text-[#f5f2eb] placeholder-[#736c62] font-mono font-bold uppercase tracking-wider outline-none py-1"
+                      />
+                    </div>
                   </div>
 
                   <div>
